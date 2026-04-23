@@ -1,0 +1,14 @@
+package com.clinic.orchestrator;
+
+public enum OrchestrationState {
+    START,
+    PENDING,
+    CONSUMER_VERIFIED,
+    APPOINTMENT_CREATED,
+    PAYMENT_PROCESSED,
+    NOTIFICATION_SENT,
+    COMPLETED,
+    FAILED,
+    COMPENSATING_PAYMENT,
+    COMPENSATING_APPOINTMENT
+}
