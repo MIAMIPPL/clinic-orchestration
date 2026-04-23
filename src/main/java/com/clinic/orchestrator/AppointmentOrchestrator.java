@@ -27,7 +27,7 @@ public class AppointmentOrchestrator {
 
         try {
             // Шаг 1: Проверка пациента (через брокер)
-            context.setCurrentState(orchestrator.OrchestrationState.PENDING);
+            context.setCurrentState(OrchestrationState.PENDING);
             System.out.println("\n[ORCHESTRATOR] State: PENDING");
             System.out.println("Action: Sending VERIFY_CONSUMER command...");
 
@@ -43,11 +43,11 @@ public class AppointmentOrchestrator {
                 throw new Exception("Consumer verification failed: " + consumerResponse.getMessage());
             }
 
-            context.setCurrentState(orchestrator.OrchestrationState.CONSUMER_VERIFIED);
+            context.setCurrentState(OrchestrationState.CONSUMER_VERIFIED);
             System.out.println("[ORCHESTRATOR] State: CONSUMER_VERIFIED");
 
             // Шаг 2: Создание записи
-            context.setCurrentState(orchestrator.OrchestrationState.APPOINTMENT_CREATED);
+            context.setCurrentState(OrchestrationState.APPOINTMENT_CREATED);
             System.out.println("\n[ORCHESTRATOR] State: APPOINTMENT_CREATED");
             System.out.println("Action: Sending CREATE_APPOINTMENT command...");
 
@@ -64,7 +64,7 @@ public class AppointmentOrchestrator {
             context.setAmount(apptResponse.getPrice());
 
             // Шаг 3: Обработка платежа
-            context.setCurrentState(orchestrator.OrchestrationState.PAYMENT_PROCESSED);
+            context.setCurrentState(OrchestrationState.PAYMENT_PROCESSED);
             System.out.println("\n[ORCHESTRATOR] State: PAYMENT_PROCESSED");
             System.out.println("Action: Sending PROCESS_PAYMENT command...");
 
@@ -79,7 +79,7 @@ public class AppointmentOrchestrator {
             context.setPaymentId(paymentResponse.getPaymentId());
 
             // Шаг 4: Отправка уведомления
-            context.setCurrentState(orchestrator.OrchestrationState.NOTIFICATION_SENT);
+            context.setCurrentState(OrchestrationState.NOTIFICATION_SENT);
             System.out.println("\n[ORCHESTRATOR] State: NOTIFICATION_SENT");
             System.out.println("Action: Sending SEND_NOTIFICATION command...");
 
@@ -96,7 +96,7 @@ public class AppointmentOrchestrator {
             context.setNotificationId(notifResponse.getNotificationId());
 
             // Завершение
-            context.setCurrentState(orchestrator.OrchestrationState.COMPLETED);
+            context.setCurrentState(OrchestrationState.COMPLETED);
             context.setCompletedAt(LocalDateTime.now());
             System.out.println("\n[ORCHESTRATOR] State: COMPLETED");
 
@@ -129,14 +129,14 @@ public class AppointmentOrchestrator {
 
         try {
             if (context.getPaymentId() != null) {
-                context.setCurrentState(orchestrator.OrchestrationState.COMPENSATING_PAYMENT);
+                context.setCurrentState(OrchestrationState.COMPENSATING_PAYMENT);
                 System.out.println("\n[ORCHESTRATOR] State: COMPENSATING_PAYMENT");
                 Message refundMsg = new Message("REFUND_PAYMENT", context.getPaymentId(), correlationId);
                 broker.sendCommand("PAYMENTS", refundMsg);
             }
 
             if (context.getAppointmentId() != null) {
-                context.setCurrentState(orchestrator.OrchestrationState.COMPENSATING_APPOINTMENT);
+                context.setCurrentState(OrchestrationState.COMPENSATING_APPOINTMENT);
                 System.out.println("\n[ORCHESTRATOR] State: COMPENSATING_APPOINTMENT");
                 Message cancelMsg = new Message("CANCEL_APPOINTMENT", context.getAppointmentId(), correlationId);
                 broker.sendCommand("APPOINTMENTS", cancelMsg);
@@ -145,7 +145,7 @@ public class AppointmentOrchestrator {
             Thread.currentThread().interrupt();
         }
 
-        context.setCurrentState(orchestrator.OrchestrationState.FAILED);
+        context.setCurrentState(OrchestrationState.FAILED);
         context.setCompletedAt(LocalDateTime.now());
     }
 
